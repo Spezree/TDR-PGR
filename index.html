@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>TurfScout Pro - TDR 350 & PGR</title>
+  <title>TurfScout Pro - TDR 350 Telemetry & PGR</title>
   <style>
     :root {
       --bg: #0d1117;
@@ -13,81 +13,87 @@
       --text-dim: #8b949e;
       --accent: #2ea043;
       --accent-hover: #3fb950;
+      --tdr-lcd: #0a110d;
+      --tdr-border: #238636;
       --wilt: #f85149;
       --optimal: #2ea043;
       --wet: #58a6ff;
-      --warn: #d29922;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 70px; }
     
-    /* Top Header */
-    header { background-color: var(--card-bg); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .title { font-size: 1.1rem; font-weight: 700; color: #fff; }
-    .header-pills { display: flex; gap: 8px; align-items: center; }
-    .pill { background: #21262d; border: 1px solid var(--border); color: var(--text-dim); padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    header { background-color: var(--card-bg); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .title { font-size: 1rem; font-weight: 800; letter-spacing: 0.5px; color: #fff; }
+    .header-pills { display: flex; gap: 6px; align-items: center; }
+    .pill { background: #21262d; border: 1px solid var(--border); color: var(--text-dim); padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
     .pill.active { border-color: var(--accent); color: var(--accent-hover); }
 
-    /* Navigation Tabs */
     .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-    .tab-btn { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; font-weight: 600; gap: 4px; cursor: pointer; width: 25%; }
+    .tab-btn { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; font-weight: 600; gap: 3px; cursor: pointer; width: 25%; }
     .tab-btn.active { color: var(--accent-hover); }
-    .tab-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .tab-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
-    /* Views */
-    .view-container { padding: 12px; max-width: 550px; margin: 0 auto; }
+    .view-container { padding: 10px; max-width: 550px; margin: 0 auto; }
     .view { display: none; }
     .view.active { display: block; }
 
-    /* Cards & Controls */
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-    .card-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+    .card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
     
-    /* Config Selectors */
-    .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
-    .select-btn { background: #21262d; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
+    /* Hardware Selectors */
+    .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 6px; }
+    .select-btn { background: #21262d; border: 1px solid var(--border); color: var(--text); padding: 7px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-align: center; }
     .select-btn.active { background: #238636; border-color: #2ea043; color: white; }
 
-    /* Hole Navigation Banner */
-    .hole-banner { display: flex; justify-content: space-between; align-items: center; background: #21262d; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
-    .hole-title { font-size: 1.25rem; font-weight: 800; color: #fff; }
-    .hole-sub { font-size: 0.75rem; color: var(--text-dim); }
+    /* TDR 350 Digital Screen Card */
+    .tdr-screen { background: var(--tdr-lcd); border: 2px solid var(--tdr-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
+    .tdr-left { border-right: 1px solid #1f3b25; padding-right: 8px; }
+    .tdr-vwc-display { display: flex; align-items: baseline; gap: 4px; }
+    .tdr-vwc-val { font-size: 2.5rem; font-weight: 900; line-height: 1; color: #56d364; font-family: monospace; }
+    .tdr-vwc-unit { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); }
+    .tdr-sub-metrics { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .tdr-metric { font-size: 1.05rem; font-weight: 800; font-family: monospace; color: #f0f6fc; }
+    
+    .tdr-right { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.72rem; color: #8b949e; line-height: 1.35; }
+    .tdr-status-row { display: flex; justify-content: space-between; align-items: center; }
+    .tdr-info-highlight { color: #f0f6fc; font-weight: 700; }
 
-    /* 12-Point Green Grid Matrix */
-    .green-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
-    .grid-cell { background: #21262d; border: 2px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; min-height: 52px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+    /* Hole Navigation Banner */
+    .hole-banner { display: flex; justify-content: space-between; align-items: center; background: #21262d; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; }
+    .hole-title { font-size: 1.1rem; font-weight: 800; color: #fff; }
+    .hole-sub { font-size: 0.7rem; color: var(--text-dim); }
+
+    /* 12-Point Green Grid */
+    .green-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+    .grid-cell { background: #21262d; border: 2px solid var(--border); border-radius: 6px; padding: 6px 3px; text-align: center; cursor: pointer; min-height: 58px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
     .grid-cell.active-cell { border-color: #58a6ff; box-shadow: 0 0 8px rgba(88, 166, 255, 0.4); background: #1f293d; }
-    .grid-cell .cell-label { font-size: 0.65rem; color: var(--text-dim); position: absolute; top: 3px; left: 5px; }
-    .grid-cell .cell-val { font-size: 1.15rem; font-weight: 800; }
+    .grid-cell .cell-top { display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-dim); }
+    .grid-cell .cell-vwc { font-size: 1.15rem; font-weight: 800; }
+    .grid-cell .cell-footer { font-size: 0.58rem; color: #8b949e; font-family: monospace; }
     .grid-cell.wilt { background: rgba(248, 81, 73, 0.2); border-color: var(--wilt); color: #ff7b72; }
     .grid-cell.optimal { background: rgba(46, 160, 67, 0.2); border-color: var(--optimal); color: #56d364; }
     .grid-cell.wet { background: rgba(88, 166, 255, 0.2); border-color: var(--wet); color: #79c0ff; }
 
-    /* Custom Number Pad for Rapid Single-Thumb Entry */
-    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
-    .num-btn { background: #21262d; border: 1px solid var(--border); color: #fff; padding: 14px; font-size: 1.3rem; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: center; }
+    /* Rapid Keypad */
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 8px; }
+    .num-btn { background: #21262d; border: 1px solid var(--border); color: #fff; padding: 12px; font-size: 1.25rem; font-weight: 700; border-radius: 6px; cursor: pointer; text-align: center; }
     .num-btn:active { background: #30363d; }
-    .num-btn.action { font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; justify-content: center; }
+    .num-btn.action { font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; justify-content: center; }
 
-    /* Live Summary Bar */
-    .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; margin-bottom: 10px; }
-    .summary-box { background: #21262d; border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; }
-    .summary-box .val { font-size: 1rem; font-weight: 800; }
-    .summary-box .lbl { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+    /* Environmental Adjusters */
+    .env-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+    .env-box { background: #21262d; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+    .env-input { width: 55px; background: #0d1117; border: 1px solid var(--border); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 3px; border-radius: 4px; text-align: center; }
 
-    /* Action Buttons */
-    .action-row { display: flex; gap: 8px; }
-    .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center; }
+    .action-row { display: flex; gap: 6px; }
+    .btn { flex: 1; padding: 11px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: center; }
     .btn-primary { background: var(--accent); color: white; }
     .btn-secondary { background: #21262d; border: 1px solid var(--border); color: var(--text); }
     .btn-danger { background: rgba(248, 81, 73, 0.2); border: 1px solid var(--wilt); color: #ff7b72; }
 
-    /* PGR Module UI */
-    .progress-bar-bg { background: #21262d; border-radius: 10px; height: 16px; overflow: hidden; margin: 10px 0; border: 1px solid var(--border); }
+    .progress-bar-bg { background: #21262d; border-radius: 8px; height: 14px; overflow: hidden; margin: 8px 0; border: 1px solid var(--border); }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2ea043, #d29922 80%, #f85149 100%); width: 0%; transition: width 0.3s ease; }
-
-    /* Map Canvas */
-    #perimeterCanvas { width: 100%; height: 260px; background: #000; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+    #perimeterCanvas { width: 100%; height: 240px; background: #000; border-radius: 6px; border: 1px solid var(--border); margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -101,52 +107,119 @@
   </header>
 
   <main class="view-container">
+    <!-- VIEW 1: TDR 350 MOISTURE LOGGING -->
     <section id="view-moisture" class="view active">
       
+      <!-- Hardware & Route Profile -->
       <div class="card">
-        <div class="card-title">Hardware & Route Profile</div>
+        <div class="card-title">Hardware Profile & Calibration</div>
         <div class="select-grid">
           <button class="select-btn active" id="route-sweeping" onclick="setRoute('sweeping')">Sweeping Run</button>
           <button class="select-btn" id="route-standard" onclick="setRoute('standard')">Standard 1-18</button>
         </div>
         <div class="select-grid" style="grid-template-columns: repeat(4, 1fr);">
-          <button class="select-btn" id="rod-15" onclick="setRod('1.5')">1.5"</button>
-          <button class="select-btn active" id="rod-30" onclick="setRod('3.0')">3.0"</button>
+          <button class="select-btn active" id="rod-15" onclick="setRod('1.5')">1.5" Turf</button>
+          <button class="select-btn" id="rod-30" onclick="setRod('3.0')">3.0"</button>
           <button class="select-btn" id="rod-48" onclick="setRod('4.8')">4.8"</button>
           <button class="select-btn" id="rod-80" onclick="setRod('8.0')">8.0"</button>
         </div>
+        <div class="select-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom:0;">
+          <button class="select-btn active" id="soil-standard" onclick="setSoil('STANDARD')">Standard</button>
+          <button class="select-btn" id="soil-clay" onclick="setSoil('HI-CLAY')">Hi-Clay</button>
+          <button class="select-btn" id="soil-sand" onclick="setSoil('SAND')">Sand</button>
+        </div>
       </div>
 
+      <!-- TDR 350 DIGITAL TELEMETRY SCREEN (Mirrors probe display) -->
+      <div class="tdr-screen">
+        <div class="tdr-left">
+          <div class="tdr-vwc-display">
+            <span class="tdr-vwc-val" id="hudVwc">28.9</span>
+            <span class="tdr-vwc-unit">%VWC</span>
+          </div>
+          <div class="tdr-sub-metrics">
+            <div class="tdr-metric"><span id="hudEc">0.24</span> <span style="font-size:0.7rem; color:var(--text-dim);">mS/cm</span></div>
+            <div class="tdr-metric"><span id="hudTemp">20.9</span> <span style="font-size:0.7rem; color:var(--text-dim);">°C</span></div>
+          </div>
+        </div>
+        <div class="tdr-right">
+          <div class="tdr-status-row">
+            <span>🔋 100%</span>
+            <span>📡 GPS</span>
+          </div>
+          <div>Rods: <span class="tdr-info-highlight" id="hudRods">TURF 1.5"</span></div>
+          <div>Soil: <span class="tdr-info-highlight" id="hudSoil">STANDARD</span></div>
+          <div>Count: <span class="tdr-info-highlight" id="hudCount">000</span></div>
+          <div>Average: <span class="tdr-info-highlight" id="hudAvg">-- %</span></div>
+        </div>
+      </div>
+
+      <!-- Current Hole Status -->
       <div class="hole-banner">
         <div>
           <div class="hole-title" id="currentHoleTitle">Club Putter</div>
           <div class="hole-sub" id="currentHoleSub">Stop 1 of 20 • Sweeping Run</div>
         </div>
-        <button class="btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 6px;" onclick="skipGreen()">⤺ Skip</button>
+        <button class="btn-secondary" style="padding: 5px 8px; font-size: 0.7rem; border-radius: 4px;" onclick="skipGreen()">⤺ Skip</button>
       </div>
 
+      <!-- 12-Point Green Grid -->
       <div class="green-matrix">
-        <div class="grid-cell" id="cell-10" onclick="selectCell(10)"><span class="cell-label">10:BL</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-11" onclick="selectCell(11)"><span class="cell-label">11:BC</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-12" onclick="selectCell(12)"><span class="cell-label">12:BR</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-7" onclick="selectCell(7)"><span class="cell-label">7:MBL</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-8" onclick="selectCell(8)"><span class="cell-label">8:MBC</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-9" onclick="selectCell(9)"><span class="cell-label">9:MBR</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-4" onclick="selectCell(4)"><span class="cell-label">4:MFL</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-5" onclick="selectCell(5)"><span class="cell-label">5:MFC</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-6" onclick="selectCell(6)"><span class="cell-label">6:MFR</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-1" onclick="selectCell(1)"><span class="cell-label">1:FL</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-2" onclick="selectCell(2)"><span class="cell-label">2:FC</span><span class="cell-val">-</span></div>
-        <div class="grid-cell" id="cell-3" onclick="selectCell(3)"><span class="cell-label">3:FR</span><span class="cell-val">-</span></div>
+        <!-- Row 4 (Back) -->
+        <div class="grid-cell" id="cell-10" onclick="selectCell(10)">
+          <div class="cell-top"><span>10:BL</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-11" onclick="selectCell(11)">
+          <div class="cell-top"><span>11:BC</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-12" onclick="selectCell(12)">
+          <div class="cell-top"><span>12:BR</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <!-- Row 3 (Mid-Back) -->
+        <div class="grid-cell" id="cell-7" onclick="selectCell(7)">
+          <div class="cell-top"><span>7:MBL</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-8" onclick="selectCell(8)">
+          <div class="cell-top"><span>8:MBC</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-9" onclick="selectCell(9)">
+          <div class="cell-top"><span>9:MBR</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <!-- Row 2 (Mid-Front) -->
+        <div class="grid-cell" id="cell-4" onclick="selectCell(4)">
+          <div class="cell-top"><span>4:MFL</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-5" onclick="selectCell(5)">
+          <div class="cell-top"><span>5:MFC</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-6" onclick="selectCell(6)">
+          <div class="cell-top"><span>6:MFR</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <!-- Row 1 (Front) -->
+        <div class="grid-cell" id="cell-1" onclick="selectCell(1)">
+          <div class="cell-top"><span>1:FL</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-2" onclick="selectCell(2)">
+          <div class="cell-top"><span>2:FC</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
+        <div class="grid-cell" id="cell-3" onclick="selectCell(3)">
+          <div class="cell-top"><span>3:FR</span></div><div class="cell-vwc">-</div><div class="cell-footer">-- | --</div>
+        </div>
       </div>
 
-      <div class="summary-bar">
-        <div class="summary-box"><div class="val" id="sumAvg">-</div><div class="lbl">Avg VWC</div></div>
-        <div class="summary-box"><div class="val" id="sumMin">-</div><div class="lbl">Min</div></div>
-        <div class="summary-box"><div class="val" id="sumMax">-</div><div class="lbl">Max</div></div>
-        <div class="summary-box"><div class="val" id="sumDry" style="color:#ff7b72;">0</div><div class="lbl">Dry Spots</div></div>
+      <!-- Live EC & Soil Temp Setting for Active Point -->
+      <div class="env-row">
+        <div class="env-box">
+          <span>EC (mS/cm):</span>
+          <input type="number" step="0.01" id="currentEcInput" value="0.24" class="env-input" onchange="updateEnvironmentalValues()" />
+        </div>
+        <div class="env-box">
+          <span>Temp (°C):</span>
+          <input type="number" step="0.1" id="currentTempInput" value="20.9" class="env-input" onchange="updateEnvironmentalValues()" />
+        </div>
       </div>
 
+      <!-- Rapid No-Decimal Keypad -->
       <div class="numpad">
         <button class="num-btn" onclick="pressNum('1')">1</button>
         <button class="num-btn" onclick="pressNum('2')">2</button>
@@ -162,65 +235,69 @@
         <button class="num-btn action" onclick="deleteDigit()">⌫</button>
       </div>
 
+      <!-- Action Navigation Row -->
       <div class="action-row">
         <button class="btn btn-secondary" onclick="prevGreen()">◄ Prev</button>
         <button class="btn btn-primary" id="saveNextBtn" onclick="nextGreen()">Save & Next Green ►</button>
       </div>
     </section>
 
+    <!-- VIEW 2: GPS PERIMETER MAPPER -->
     <section id="view-gps" class="view">
       <div class="card">
         <div class="card-title">Green Perimeter Logger</div>
-        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">Walk the outer collar edge with your Pixel mounted to generate the base map polygon.</p>
-        <div class="action-row" style="margin-bottom:10px;">
+        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:8px;">Walk the outer green collar with your Pixel mounted to generate the base map polygon.</p>
+        <div class="action-row" style="margin-bottom:8px;">
           <button class="btn btn-primary" id="startWalkBtn" onclick="togglePerimeterTracking()">▶ Start Walk</button>
           <button class="btn btn-secondary" onclick="clearPerimeter()">Reset</button>
         </div>
-        <div style="font-size:0.75rem; color:var(--text-dim);" id="gpsCoordinatesLog">Points Logged: 0 | Accuracy: --</div>
-        <canvas id="perimeterCanvas" width="400" height="260"></canvas>
+        <div style="font-size:0.7rem; color:var(--text-dim);" id="gpsCoordinatesLog">Points: 0 | Fix: --</div>
+        <canvas id="perimeterCanvas" width="400" height="240"></canvas>
       </div>
     </section>
 
+    <!-- VIEW 3: PGR & GDD TRACKER -->
     <section id="view-pgr" class="view">
       <div class="card">
         <div class="card-title">Primo / PGR Degradation Engine</div>
-        <div style="margin: 8px 0;">
-          <div style="display:flex; justify-content:space-between; font-weight:700;">
+        <div style="margin: 6px 0;">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.85rem;">
             <span id="pgrStatusText">Greens Program: Active</span>
             <span id="pgrGddText">185 / 220 GDD</span>
           </div>
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="pgrProgressFill" style="width: 84%;"></div>
           </div>
-          <div style="font-size:0.75rem; color:var(--text-dim);" id="pgrReboundNotice">⚠️ Rebound surge window approaching in ~35 GDD.</div>
+          <div style="font-size:0.72rem; color:var(--text-dim);" id="pgrReboundNotice">⚠️ Rebound surge window approaching in ~35 GDD.</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Log Daily Temperature (GDD Base 10°C)</div>
+        <div class="card-title">Log Daily Temperature (Base 10°C)</div>
         <div class="select-grid">
           <input type="number" id="tempMax" placeholder="Max Temp (°C)" class="select-btn" style="text-align:left;" />
           <input type="number" id="tempMin" placeholder="Min Temp (°C)" class="select-btn" style="text-align:left;" />
         </div>
-        <button class="btn btn-secondary" style="width:100%; margin-top:6px;" onclick="addDailyGdd()">+ Accumulate Today's GDD</button>
+        <button class="btn btn-secondary" style="width:100%; margin-top:4px;" onclick="addDailyGdd()">+ Accumulate Today's GDD</button>
       </div>
 
       <div class="card">
         <div class="card-title">Log New PGR Application</div>
-        <input type="text" id="pgrProduct" placeholder="Product (e.g. Primo Maxx II)" class="select-btn" style="width:100%; text-align:left; margin-bottom:8px;" />
+        <input type="text" id="pgrProduct" placeholder="Product (e.g. Primo Maxx II)" class="select-btn" style="width:100%; text-align:left; margin-bottom:6px;" />
         <div class="select-grid">
           <input type="text" id="pgrRate" placeholder="Rate (e.g. 400 mL/ha)" class="select-btn" style="text-align:left;" />
           <input type="number" id="pgrTargetGdd" placeholder="Target GDD (e.g. 220)" class="select-btn" style="text-align:left;" />
         </div>
-        <button class="btn btn-primary" style="width:100%; margin-top:6px;" onclick="resetPgrCycle()">Apply & Reset GDD Cycle</button>
+        <button class="btn btn-primary" style="width:100%; margin-top:4px;" onclick="resetPgrCycle()">Apply & Reset GDD Cycle</button>
       </div>
     </section>
 
+    <!-- VIEW 4: DATA EXPORT & CLOUD SYNC -->
     <section id="view-data" class="view">
       <div class="card">
         <div class="card-title">Export Spectrum FieldScout Data</div>
-        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:12px;">Export all recorded VWC%, rod settings, timestamps, and GPS coordinates to CSV formatted for SpecConnect.</p>
-        <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="exportToCSV()">📥 Download SpecConnect CSV</button>
+        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:10px;">Export VWC%, EC (mS/cm), Soil Temp (°C), Rod settings, Soil Type, and GPS coordinates to SpecConnect CSV.</p>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:6px;" onclick="exportToCSV()">📥 Download SpecConnect CSV</button>
         <button class="btn btn-danger" style="width:100%;" onclick="clearAllData()">🗑 Clear Local Session Data</button>
       </div>
     </section>
@@ -246,26 +323,23 @@
   </nav>
 
   <script>
-    // --- STATE MANAGEMENT ---
     const ROUTES = {
       sweeping: ["Club Putter", "6", "D Range Green", "16", "14", "15", "1", "10", "13", "12", "11", "2", "3", "4", "5", "7", "8", "17", "18", "9"],
       standard: ["Club Putter", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "D Range Green"]
     };
 
-    // Serpentine walking pattern: 1,2,3 -> 6,5,4 -> 7,8,9 -> 12,11,10
     const SERPENTINE_ORDER = [1, 2, 3, 6, 5, 4, 7, 8, 9, 12, 11, 10];
 
     let currentRouteType = 'sweeping';
-    let currentRodLength = '3.0';
+    let currentRodLength = '1.5';
+    let currentSoilType = 'STANDARD';
     let currentStopIndex = 0;
     let activeCellId = 1;
     let inputBuffer = "";
     let wakeLock = null;
 
-    // Green Moisture Data Store: { "HoleName": { 1: val, 2: val, ... } }
-    let sessionLogs = JSON.parse(localStorage.getItem('turf_session_logs') || '{}');
+    let sessionLogs = JSON.parse(localStorage.getItem('turf_session_logs_v2') || '{}');
     
-    // PGR Tracker Data
     let pgrData = JSON.parse(localStorage.getItem('turf_pgr_data') || JSON.stringify({
       product: "Primo Maxx II",
       rate: "400 mL/ha",
@@ -273,7 +347,6 @@
       targetGdd: 220
     }));
 
-    // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
       initHole();
       updatePgrUI();
@@ -287,7 +360,6 @@
       btn.classList.add('active');
     }
 
-    // --- ROUTE & ROD CONFIG ---
     function setRoute(type) {
       currentRouteType = type;
       currentStopIndex = 0;
@@ -301,10 +373,18 @@
       ['15', '30', '48', '80'].forEach(id => {
         document.getElementById('rod-' + id).classList.toggle('active', id === length.replace('.', ''));
       });
+      document.getElementById('hudRods').innerText = length === '1.5' ? 'TURF 1.5"' : `${length}"`;
       refreshCellColors();
     }
 
-    // --- HOLE LOGIC ---
+    function setSoil(mode) {
+      currentSoilType = mode;
+      document.getElementById('soil-standard').classList.toggle('active', mode === 'STANDARD');
+      document.getElementById('soil-clay').classList.toggle('active', mode === 'HI-CLAY');
+      document.getElementById('soil-sand').classList.toggle('active', mode === 'SAND');
+      document.getElementById('hudSoil').innerText = mode;
+    }
+
     function getActiveHoleName() {
       return ROUTES[currentRouteType][currentStopIndex];
     }
@@ -318,11 +398,16 @@
         sessionLogs[holeName] = {};
       }
 
-      // Populate Grid
       for (let i = 1; i <= 12; i++) {
         const cell = document.getElementById(`cell-${i}`);
-        const val = sessionLogs[holeName][i] !== undefined ? sessionLogs[holeName][i].toFixed(1) : '-';
-        cell.querySelector('.cell-val').innerText = val;
+        const data = sessionLogs[holeName][i];
+        if (data) {
+          cell.querySelector('.cell-vwc').innerText = data.vwc.toFixed(1);
+          cell.querySelector('.cell-footer').innerText = `${data.ec.toFixed(2)} | ${data.temp.toFixed(1)}°C`;
+        } else {
+          cell.querySelector('.cell-vwc').innerText = '-';
+          cell.querySelector('.cell-footer').innerText = '-- | --';
+        }
       }
       refreshCellColors();
       calculateSummary();
@@ -335,19 +420,37 @@
       document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('active-cell'));
       const activeEl = document.getElementById(`cell-${pointId}`);
       if (activeEl) activeEl.classList.add('active-cell');
+
+      const holeName = getActiveHoleName();
+      const existing = sessionLogs[holeName] ? sessionLogs[holeName][pointId] : null;
+      if (existing) {
+        document.getElementById('hudVwc').innerText = existing.vwc.toFixed(1);
+        document.getElementById('hudEc').innerText = existing.ec.toFixed(2);
+        document.getElementById('hudTemp').innerText = existing.temp.toFixed(1);
+      }
     }
 
-    // --- RAPID NO-DECIMAL KEYPAD LOGIC ---
+    function updateEnvironmentalValues() {
+      const ec = parseFloat(document.getElementById('currentEcInput').value) || 0.24;
+      const temp = parseFloat(document.getElementById('currentTempInput').value) || 20.9;
+      document.getElementById('hudEc').innerText = ec.toFixed(2);
+      document.getElementById('hudTemp').innerText = temp.toFixed(1);
+    }
+
     function pressNum(digit) {
       inputBuffer += digit;
       const cell = document.getElementById(`cell-${activeCellId}`);
       
       if (inputBuffer.length < 3) {
-        cell.querySelector('.cell-val').innerText = (parseInt(inputBuffer) / 10).toFixed(1);
+        const displayVal = (parseInt(inputBuffer) / 10).toFixed(1);
+        cell.querySelector('.cell-vwc').innerText = displayVal;
+        document.getElementById('hudVwc').innerText = displayVal;
       } else if (inputBuffer.length === 3) {
-        // Automatically convert 3 digits to decimal (e.g. 148 -> 14.8)
         const vwcVal = parseFloat((parseInt(inputBuffer) / 10).toFixed(1));
-        recordVwc(activeCellId, vwcVal);
+        const ecVal = parseFloat(document.getElementById('currentEcInput').value) || 0.24;
+        const tempVal = parseFloat(document.getElementById('currentTempInput').value) || 20.9;
+
+        recordShot(activeCellId, vwcVal, ecVal, tempVal);
         inputBuffer = "";
         advanceSerpentine();
       }
@@ -356,7 +459,9 @@
     function deleteDigit() {
       inputBuffer = inputBuffer.slice(0, -1);
       const cell = document.getElementById(`cell-${activeCellId}`);
-      cell.querySelector('.cell-val').innerText = inputBuffer.length > 0 ? (parseInt(inputBuffer) / 10).toFixed(1) : '-';
+      const val = inputBuffer.length > 0 ? (parseInt(inputBuffer) / 10).toFixed(1) : '-';
+      cell.querySelector('.cell-vwc').innerText = val;
+      document.getElementById('hudVwc').innerText = val !== '-' ? val : '0.0';
     }
 
     function clearCurrentCell() {
@@ -367,18 +472,31 @@
       initHole();
     }
 
-    function recordVwc(pointId, value) {
+    function recordShot(pointId, vwc, ec, temp) {
       const holeName = getActiveHoleName();
       if (!sessionLogs[holeName]) sessionLogs[holeName] = {};
       
-      // Get GPS coordinate if available
       let lat = null, lng = null;
       if (currentPosition) {
         lat = currentPosition.coords.latitude;
         lng = currentPosition.coords.longitude;
       }
 
-      sessionLogs[holeName][pointId] = value;
+      sessionLogs[holeName][pointId] = {
+        vwc: vwc,
+        ec: ec,
+        temp: temp,
+        rod: currentRodLength,
+        soil: currentSoilType,
+        lat: lat,
+        lng: lng,
+        timestamp: new Date().toISOString()
+      };
+
+      document.getElementById('hudVwc').innerText = vwc.toFixed(1);
+      document.getElementById('hudEc').innerText = ec.toFixed(2);
+      document.getElementById('hudTemp').innerText = temp.toFixed(1);
+
       saveLogs();
       refreshCellColors();
       calculateSummary();
@@ -393,18 +511,17 @@
 
     function refreshCellColors() {
       const holeName = getActiveHoleName();
-      // Target bands based on probe length
       const targetLow = currentRodLength === '1.5' ? 10.0 : 13.0;
       const targetHigh = currentRodLength === '1.5' ? 15.0 : 18.0;
 
       for (let i = 1; i <= 12; i++) {
         const cell = document.getElementById(`cell-${i}`);
-        const val = sessionLogs[holeName] ? sessionLogs[holeName][i] : undefined;
+        const data = sessionLogs[holeName] ? sessionLogs[holeName][i] : undefined;
         cell.classList.remove('wilt', 'optimal', 'wet');
 
-        if (val !== undefined) {
-          if (val < targetLow) cell.classList.add('wilt');
-          else if (val <= targetHigh) cell.classList.add('optimal');
+        if (data && data.vwc !== undefined) {
+          if (data.vwc < targetLow) cell.classList.add('wilt');
+          else if (data.vwc <= targetHigh) cell.classList.add('optimal');
           else cell.classList.add('wet');
         }
       }
@@ -412,24 +529,18 @@
 
     function calculateSummary() {
       const holeName = getActiveHoleName();
-      const vals = sessionLogs[holeName] ? Object.values(sessionLogs[holeName]) : [];
-      if (vals.length === 0) {
-        document.getElementById('sumAvg').innerText = '-';
-        document.getElementById('sumMin').innerText = '-';
-        document.getElementById('sumMax').innerText = '-';
-        document.getElementById('sumDry').innerText = '0';
+      const points = sessionLogs[holeName] ? Object.values(sessionLogs[holeName]) : [];
+      const count = points.length;
+      
+      document.getElementById('hudCount').innerText = String(count).padStart(3, '0');
+
+      if (count === 0) {
+        document.getElementById('hudAvg').innerText = '-- %';
         return;
       }
-      const avg = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
-      const min = Math.min(...vals).toFixed(1);
-      const max = Math.max(...vals).toFixed(1);
-      const targetLow = currentRodLength === '1.5' ? 10.0 : 13.0;
-      const dryCount = vals.filter(v => v < targetLow).length;
 
-      document.getElementById('sumAvg').innerText = avg + '%';
-      document.getElementById('sumMin').innerText = min + '%';
-      document.getElementById('sumMax').innerText = max + '%';
-      document.getElementById('sumDry').innerText = dryCount;
+      const avg = (points.reduce((a, b) => a + b.vwc, 0) / count).toFixed(1);
+      document.getElementById('hudAvg').innerText = avg + ' %';
     }
 
     function nextGreen() {
@@ -437,7 +548,7 @@
         currentStopIndex++;
         initHole();
       } else {
-        alert("Run Complete! Ready to export session data.");
+        alert("Session Complete! Export data from the Data tab.");
       }
     }
 
@@ -448,15 +559,12 @@
       }
     }
 
-    function skipGreen() {
-      nextGreen();
-    }
+    function skipGreen() { nextGreen(); }
 
     function saveLogs() {
-      localStorage.setItem('turf_session_logs', JSON.stringify(sessionLogs));
+      localStorage.setItem('turf_session_logs_v2', JSON.stringify(sessionLogs));
     }
 
-    // --- SCREEN WAKE LOCK API (Keeps screen awake on TDR mount) ---
     async function toggleWakeLock() {
       if ('wakeLock' in navigator) {
         try {
@@ -470,15 +578,10 @@
             document.getElementById('wakeLockStatus').innerText = "⚡ Screen: Dim";
             document.getElementById('wakeLockStatus').classList.remove('active');
           }
-        } catch (err) {
-          console.error(err);
-        }
-      } else {
-        alert("WakeLock not supported in this browser.");
+        } catch (err) { console.error(err); }
       }
     }
 
-    // --- GPS & PERIMETER MAPPER ---
     let currentPosition = null;
     let isTrackingPerimeter = false;
     let perimeterPoints = [];
@@ -492,9 +595,7 @@
             document.getElementById('gpsStatus').innerText = `📡 GPS: ±${pos.coords.accuracy.toFixed(1)}m`;
             document.getElementById('gpsStatus').classList.add('active');
           },
-          err => {
-            document.getElementById('gpsStatus').innerText = `📡 GPS: Error`;
-          },
+          err => { document.getElementById('gpsStatus').innerText = `📡 GPS: Error`; },
           { enableHighAccuracy: true }
         );
       }
@@ -518,14 +619,14 @@
 
     function recordPerimeterPoint(pos) {
       perimeterPoints.push({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      document.getElementById('gpsCoordinatesLog').innerText = `Points: ${perimeterPoints.length} | Accuracy: ±${pos.coords.accuracy.toFixed(1)}m`;
+      document.getElementById('gpsCoordinatesLog').innerText = `Points: ${perimeterPoints.length} | Fix: ±${pos.coords.accuracy.toFixed(1)}m`;
       drawPerimeterCanvas();
     }
 
     function clearPerimeter() {
       perimeterPoints = [];
       drawPerimeterCanvas();
-      document.getElementById('gpsCoordinatesLog').innerText = `Points Logged: 0 | Accuracy: --`;
+      document.getElementById('gpsCoordinatesLog').innerText = `Points: 0 | Fix: --`;
     }
 
     function drawPerimeterCanvas() {
@@ -545,8 +646,8 @@
       ctx.beginPath();
 
       perimeterPoints.forEach((p, idx) => {
-        const x = 30 + ((p.lng - minLng) / (maxLng - minLng || 1)) * (canvas.width - 60);
-        const y = 30 + ((maxLat - p.lat) / (maxLat - minLat || 1)) * (canvas.height - 60);
+        const x = 20 + ((p.lng - minLng) / (maxLng - minLng || 1)) * (canvas.width - 40);
+        const y = 20 + ((maxLat - p.lat) / (maxLat - minLat || 1)) * (canvas.height - 40);
         if (idx === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
@@ -557,7 +658,6 @@
       ctx.stroke();
     }
 
-    // --- PGR & GDD ENGINE ---
     function updatePgrUI() {
       const pct = Math.min(100, Math.round((pgrData.accumulatedGdd / pgrData.targetGdd) * 100));
       document.getElementById('pgrGddText').innerText = `${pgrData.accumulatedGdd} / ${pgrData.targetGdd} GDD`;
@@ -574,10 +674,10 @@
     function addDailyGdd() {
       const max = parseFloat(document.getElementById('tempMax').value);
       const min = parseFloat(document.getElementById('tempMin').value);
-      if (isNaN(max) || isNaN(min)) return alert("Please enter valid max and min temperatures.");
+      if (isNaN(max) || isNaN(min)) return alert("Enter valid temperatures.");
       
       const avg = (max + min) / 2;
-      const dailyGdd = Math.max(0, avg - 10); // Base 10°C standard
+      const dailyGdd = Math.max(0, avg - 10);
       pgrData.accumulatedGdd = Math.round(pgrData.accumulatedGdd + dailyGdd);
       updatePgrUI();
       document.getElementById('tempMax').value = '';
@@ -594,15 +694,13 @@
       alert(`PGR application logged. Cycle reset to 0 / ${target} GDD.`);
     }
 
-    // --- CSV EXPORT (SpecConnect Compatible) ---
     function exportToCSV() {
-      let csv = "UUID,Timestamp,Hole,Rod_Length_In,Point_ID,VWC_Percent,GPS_Lat,GPS_Lng\n";
-      const now = new Date().toISOString();
+      let csv = "UUID,Timestamp,Hole,Point_ID,VWC_Percent,EC_mS_cm,Soil_Temp_C,Rod_Length_In,Soil_Type,GPS_Lat,GPS_Lng\n";
 
       for (const [hole, points] of Object.entries(sessionLogs)) {
-        for (const [pointId, vwc] of Object.entries(points)) {
-          const uuid = 'log-' + Math.random().toString(36).substr(2, 9);
-          csv += `${uuid},${now},${hole},${currentRodLength},${pointId},${vwc},,\n`;
+        for (const [pointId, data] of Object.entries(points)) {
+          const uuid = 'tdr-' + Math.random().toString(36).substr(2, 9);
+          csv += `${uuid},${data.timestamp || new Date().toISOString()},${hole},${pointId},${data.vwc.toFixed(1)},${data.ec.toFixed(2)},${data.temp.toFixed(1)},${data.rod},${data.soil},${data.lat || ''},${data.lng || ''}\n`;
         }
       }
 
@@ -617,7 +715,7 @@
     }
 
     function clearAllData() {
-      if (confirm("Are you sure you want to clear all logged moisture readings?")) {
+      if (confirm("Clear all recorded moisture, EC, and temperature logs?")) {
         sessionLogs = {};
         saveLogs();
         initHole();
