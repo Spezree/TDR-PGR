@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>TurfScout Pro - TDR 350 Telemetry & PGR</title>
+  <title>TurfScout Pro - TDR 350 & Sprinkler GIS</title>
   <style>
     :root {
       --bg: #0d1117;
@@ -18,6 +18,7 @@
       --wilt: #f85149;
       --optimal: #2ea043;
       --wet: #58a6ff;
+      --sprinkler: #1f6feb;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 70px; }
@@ -38,14 +39,14 @@
     .view.active { display: block; }
 
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
-    .card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .card-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between; align-items:center; }
     
     /* Hardware Selectors */
     .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 6px; }
     .select-btn { background: #21262d; border: 1px solid var(--border); color: var(--text); padding: 7px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-align: center; }
     .select-btn.active { background: #238636; border-color: #2ea043; color: white; }
 
-    /* TDR 350 Digital Screen Card */
+    /* TDR 350 Digital HUD */
     .tdr-screen { background: var(--tdr-lcd); border: 2px solid var(--tdr-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; }
     .tdr-left { border-right: 1px solid #1f3b25; padding-right: 8px; }
     .tdr-vwc-display { display: flex; align-items: baseline; gap: 4px; }
@@ -55,7 +56,6 @@
     .tdr-metric { font-size: 1.05rem; font-weight: 800; font-family: monospace; color: #f0f6fc; }
     
     .tdr-right { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.72rem; color: #8b949e; line-height: 1.35; }
-    .tdr-status-row { display: flex; justify-content: space-between; align-items: center; }
     .tdr-info-highlight { color: #f0f6fc; font-weight: 700; }
 
     /* Hole Navigation Banner */
@@ -65,7 +65,7 @@
 
     /* 12-Point Green Grid */
     .green-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
-    .grid-cell { background: #21262d; border: 2px solid var(--border); border-radius: 6px; padding: 6px 3px; text-align: center; cursor: pointer; min-height: 58px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+    .grid-cell { background: #21262d; border: 2px solid var(--border); border-radius: 6px; padding: 6px 3px; text-align: center; cursor: pointer; min-height: 56px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
     .grid-cell.active-cell { border-color: #58a6ff; box-shadow: 0 0 8px rgba(88, 166, 255, 0.4); background: #1f293d; }
     .grid-cell .cell-top { display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-dim); }
     .grid-cell .cell-vwc { font-size: 1.15rem; font-weight: 800; }
@@ -80,7 +80,6 @@
     .num-btn:active { background: #30363d; }
     .num-btn.action { font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; justify-content: center; }
 
-    /* Environmental Adjusters */
     .env-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
     .env-box { background: #21262d; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
     .env-input { width: 55px; background: #0d1117; border: 1px solid var(--border); color: #fff; font-size: 0.8rem; font-weight: 700; padding: 3px; border-radius: 4px; text-align: center; }
@@ -89,11 +88,15 @@
     .btn { flex: 1; padding: 11px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-align: center; }
     .btn-primary { background: var(--accent); color: white; }
     .btn-secondary { background: #21262d; border: 1px solid var(--border); color: var(--text); }
+    .btn-blue { background: #1f6feb; color: white; }
     .btn-danger { background: rgba(248, 81, 73, 0.2); border: 1px solid var(--wilt); color: #ff7b72; }
 
     .progress-bar-bg { background: #21262d; border-radius: 8px; height: 14px; overflow: hidden; margin: 8px 0; border: 1px solid var(--border); }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2ea043, #d29922 80%, #f85149 100%); width: 0%; transition: width 0.3s ease; }
-    #perimeterCanvas { width: 100%; height: 240px; background: #000; border-radius: 6px; border: 1px solid var(--border); margin-top: 6px; }
+    
+    #mapCanvas { width: 100%; height: 260px; background: #05080c; border-radius: 8px; border: 1px solid var(--border); margin-top: 6px; }
+    .sprinkler-list { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+    .sprinkler-item { background: #21262d; padding: 6px 8px; border-radius: 4px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--sprinkler); }
   </style>
 </head>
 <body>
@@ -130,7 +133,7 @@
         </div>
       </div>
 
-      <!-- TDR 350 DIGITAL TELEMETRY SCREEN (Mirrors probe display) -->
+      <!-- TDR 350 DIGITAL HUD -->
       <div class="tdr-screen">
         <div class="tdr-left">
           <div class="tdr-vwc-display">
@@ -154,7 +157,7 @@
         </div>
       </div>
 
-      <!-- Current Hole Status -->
+      <!-- Hole Banner -->
       <div class="hole-banner">
         <div>
           <div class="hole-title" id="currentHoleTitle">Club Putter</div>
@@ -207,7 +210,7 @@
         </div>
       </div>
 
-      <!-- Live EC & Soil Temp Setting for Active Point -->
+      <!-- Live EC & Soil Temp Setting -->
       <div class="env-row">
         <div class="env-box">
           <span>EC (mS/cm):</span>
@@ -219,7 +222,7 @@
         </div>
       </div>
 
-      <!-- Rapid No-Decimal Keypad -->
+      <!-- Rapid Keypad -->
       <div class="numpad">
         <button class="num-btn" onclick="pressNum('1')">1</button>
         <button class="num-btn" onclick="pressNum('2')">2</button>
@@ -235,24 +238,48 @@
         <button class="num-btn action" onclick="deleteDigit()">⌫</button>
       </div>
 
-      <!-- Action Navigation Row -->
+      <!-- Navigation Actions -->
       <div class="action-row">
         <button class="btn btn-secondary" onclick="prevGreen()">◄ Prev</button>
         <button class="btn btn-primary" id="saveNextBtn" onclick="nextGreen()">Save & Next Green ►</button>
       </div>
     </section>
 
-    <!-- VIEW 2: GPS PERIMETER MAPPER -->
+    <!-- VIEW 2: GPS PERIMETER & SPRINKLER MAPPER -->
     <section id="view-gps" class="view">
       <div class="card">
-        <div class="card-title">Green Perimeter Logger</div>
-        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:8px;">Walk the outer green collar with your Pixel mounted to generate the base map polygon.</p>
-        <div class="action-row" style="margin-bottom:8px;">
-          <button class="btn btn-primary" id="startWalkBtn" onclick="togglePerimeterTracking()">▶ Start Walk</button>
-          <button class="btn btn-secondary" onclick="clearPerimeter()">Reset</button>
+        <div class="card-title">
+          <span id="gisHoleTitle">Perimeter & Sprinklers: Club Putter</span>
         </div>
-        <div style="font-size:0.7rem; color:var(--text-dim);" id="gpsCoordinatesLog">Points: 0 | Fix: --</div>
-        <canvas id="perimeterCanvas" width="400" height="240"></canvas>
+
+        <!-- Perimeter Controls -->
+        <div style="margin-bottom: 8px;">
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:4px;">1. Boundary Collar Walk:</div>
+          <div class="action-row">
+            <button class="btn btn-primary" id="startWalkBtn" onclick="togglePerimeterTracking()">▶ Walk Perimeter</button>
+            <button class="btn btn-secondary" onclick="clearPerimeter()">Reset Boundary</button>
+          </div>
+        </div>
+
+        <!-- Sprinkler Head Logger Controls -->
+        <div style="margin-bottom: 8px; border-top: 1px solid var(--border); padding-top: 8px;">
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:4px;">2. Sprinkler Tagging: (Stand at head & tap)</div>
+          <div class="action-row">
+            <button class="btn btn-blue" onclick="tagSprinklerHead()">📍 + Log Sprinkler Head</button>
+            <button class="btn btn-secondary" onclick="clearSprinklers()">Clear Heads</button>
+          </div>
+        </div>
+
+        <div style="font-size:0.7rem; color:var(--text-dim); display:flex; justify-content:space-between;" id="gpsCoordinatesLog">
+          <span>Boundary: 0 pts | Heads: 0</span>
+          <span>Fix: --</span>
+        </div>
+
+        <!-- Map Canvas (Renders Boundary + Sprinklers + Probes) -->
+        <canvas id="mapCanvas" width="400" height="260"></canvas>
+
+        <!-- Logged Sprinklers List -->
+        <div class="sprinkler-list" id="sprinklerList"></div>
       </div>
     </section>
 
@@ -292,12 +319,13 @@
       </div>
     </section>
 
-    <!-- VIEW 4: DATA EXPORT & CLOUD SYNC -->
+    <!-- VIEW 4: DATA EXPORT & SYNC -->
     <section id="view-data" class="view">
       <div class="card">
-        <div class="card-title">Export Spectrum FieldScout Data</div>
-        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:10px;">Export VWC%, EC (mS/cm), Soil Temp (°C), Rod settings, Soil Type, and GPS coordinates to SpecConnect CSV.</p>
-        <button class="btn btn-primary" style="width:100%; margin-bottom:6px;" onclick="exportToCSV()">📥 Download SpecConnect CSV</button>
+        <div class="card-title">Export FieldScout & GIS Data</div>
+        <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:10px;">Export all probe telemetry (VWC, EC, Temp), boundary polygons, and sprinkler head coordinates.</p>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:6px;" onclick="exportToCSV()">📥 Download SpecConnect Moisture CSV</button>
+        <button class="btn btn-blue" style="width:100%; margin-bottom:6px;" onclick="exportSprinklersCSV()">📥 Download Sprinklers GIS CSV</button>
         <button class="btn btn-danger" style="width:100%;" onclick="clearAllData()">🗑 Clear Local Session Data</button>
       </div>
     </section>
@@ -310,7 +338,7 @@
     </button>
     <button class="tab-btn" onclick="switchView('gps', this)">
       <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-      Perimeter
+      Map & Heads
     </button>
     <button class="tab-btn" onclick="switchView('pgr', this)">
       <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
@@ -338,7 +366,8 @@
     let inputBuffer = "";
     let wakeLock = null;
 
-    let sessionLogs = JSON.parse(localStorage.getItem('turf_session_logs_v2') || '{}');
+    let sessionLogs = JSON.parse(localStorage.getItem('turf_session_logs_v3') || '{}');
+    let mapData = JSON.parse(localStorage.getItem('turf_map_data_v1') || '{}');
     
     let pgrData = JSON.parse(localStorage.getItem('turf_pgr_data') || JSON.stringify({
       product: "Primo Maxx II",
@@ -358,6 +387,10 @@
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('view-' + viewId).classList.add('active');
       btn.classList.add('active');
+      if (viewId === 'gps') {
+        renderFullMap();
+        renderSprinklerList();
+      }
     }
 
     function setRoute(type) {
@@ -393,10 +426,10 @@
       const holeName = getActiveHoleName();
       document.getElementById('currentHoleTitle').innerText = "Hole " + holeName;
       document.getElementById('currentHoleSub').innerText = `Stop ${currentStopIndex + 1} of ${ROUTES[currentRouteType].length} • ${currentRouteType === 'sweeping' ? 'Sweeping Run' : 'Standard'}`;
+      document.getElementById('gisHoleTitle').innerText = "Perimeter & Sprinklers: Hole " + holeName;
       
-      if (!sessionLogs[holeName]) {
-        sessionLogs[holeName] = {};
-      }
+      if (!sessionLogs[holeName]) sessionLogs[holeName] = {};
+      if (!mapData[holeName]) mapData[holeName] = { perimeter: [], sprinklers: [] };
 
       for (let i = 1; i <= 12; i++) {
         const cell = document.getElementById(`cell-${i}`);
@@ -562,7 +595,8 @@
     function skipGreen() { nextGreen(); }
 
     function saveLogs() {
-      localStorage.setItem('turf_session_logs_v2', JSON.stringify(sessionLogs));
+      localStorage.setItem('turf_session_logs_v3', JSON.stringify(sessionLogs));
+      localStorage.setItem('turf_map_data_v1', JSON.stringify(mapData));
     }
 
     async function toggleWakeLock() {
@@ -582,9 +616,9 @@
       }
     }
 
+    // --- GPS & GIS SPRINKLER / PERIMETER ENGINE ---
     let currentPosition = null;
     let isTrackingPerimeter = false;
-    let perimeterPoints = [];
     let watchId = null;
 
     function initGPS() {
@@ -594,6 +628,7 @@
             currentPosition = pos;
             document.getElementById('gpsStatus').innerText = `📡 GPS: ±${pos.coords.accuracy.toFixed(1)}m`;
             document.getElementById('gpsStatus').classList.add('active');
+            updateGpsStatusDisplay();
           },
           err => { document.getElementById('gpsStatus').innerText = `📡 GPS: Error`; },
           { enableHighAccuracy: true }
@@ -601,63 +636,183 @@
       }
     }
 
+    function updateGpsStatusDisplay() {
+      const holeName = getActiveHoleName();
+      const perimCount = mapData[holeName] ? mapData[holeName].perimeter.length : 0;
+      const spkCount = mapData[holeName] ? mapData[holeName].sprinklers.length : 0;
+      const acc = currentPosition ? `±${currentPosition.coords.accuracy.toFixed(1)}m` : '--';
+      document.getElementById('gpsCoordinatesLog').innerHTML = `<span>Boundary: ${perimCount} pts | Heads: ${spkCount}</span><span>Fix: ${acc}</span>`;
+    }
+
     function togglePerimeterTracking() {
+      const holeName = getActiveHoleName();
+      if (!mapData[holeName]) mapData[holeName] = { perimeter: [], sprinklers: [] };
       isTrackingPerimeter = !isTrackingPerimeter;
       const btn = document.getElementById('startWalkBtn');
+
       if (isTrackingPerimeter) {
         btn.innerText = "⏹ Stop & Save";
         btn.classList.replace('btn-primary', 'btn-danger');
-        perimeterPoints = [];
-        watchId = navigator.geolocation.watchPosition(recordPerimeterPoint, null, { enableHighAccuracy: true });
+        mapData[holeName].perimeter = [];
+        watchId = navigator.geolocation.watchPosition(
+          pos => {
+            mapData[holeName].perimeter.push({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            saveLogs();
+            updateGpsStatusDisplay();
+            renderFullMap();
+          },
+          null,
+          { enableHighAccuracy: true }
+        );
       } else {
-        btn.innerText = "▶ Start Walk";
+        btn.innerText = "▶ Walk Perimeter";
         btn.classList.replace('btn-danger', 'btn-primary');
         if (watchId) navigator.geolocation.clearWatch(watchId);
-        drawPerimeterCanvas();
+        saveLogs();
+        renderFullMap();
       }
     }
 
-    function recordPerimeterPoint(pos) {
-      perimeterPoints.push({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      document.getElementById('gpsCoordinatesLog').innerText = `Points: ${perimeterPoints.length} | Fix: ±${pos.coords.accuracy.toFixed(1)}m`;
-      drawPerimeterCanvas();
-    }
-
     function clearPerimeter() {
-      perimeterPoints = [];
-      drawPerimeterCanvas();
-      document.getElementById('gpsCoordinatesLog').innerText = `Points: 0 | Fix: --`;
+      const holeName = getActiveHoleName();
+      if (confirm(`Reset boundary map for Hole ${holeName}?`)) {
+        if (mapData[holeName]) mapData[holeName].perimeter = [];
+        saveLogs();
+        updateGpsStatusDisplay();
+        renderFullMap();
+      }
     }
 
-    function drawPerimeterCanvas() {
-      const canvas = document.getElementById('perimeterCanvas');
+    function tagSprinklerHead() {
+      if (!currentPosition) return alert("Waiting for high-accuracy GPS fix from phone...");
+      const holeName = getActiveHoleName();
+      if (!mapData[holeName]) mapData[holeName] = { perimeter: [], sprinklers: [] };
+
+      const headNumber = mapData[holeName].sprinklers.length + 1;
+      const defaultName = `Head ${headNumber}`;
+      const name = prompt(`Enter Sprinkler Label for Hole ${holeName}:`, defaultName) || defaultName;
+
+      mapData[holeName].sprinklers.push({
+        id: 'spk-' + Date.now(),
+        name: name,
+        lat: currentPosition.coords.latitude,
+        lng: currentPosition.coords.longitude,
+        accuracy: currentPosition.coords.accuracy,
+        timestamp: new Date().toISOString()
+      });
+
+      saveLogs();
+      updateGpsStatusDisplay();
+      renderSprinklerList();
+      renderFullMap();
+    }
+
+    function clearSprinklers() {
+      const holeName = getActiveHoleName();
+      if (confirm(`Clear all sprinkler heads on Hole ${holeName}?`)) {
+        if (mapData[holeName]) mapData[holeName].sprinklers = [];
+        saveLogs();
+        updateGpsStatusDisplay();
+        renderSprinklerList();
+        renderFullMap();
+      }
+    }
+
+    function renderSprinklerList() {
+      const holeName = getActiveHoleName();
+      const listEl = document.getElementById('sprinklerList');
+      listEl.innerHTML = '';
+      const spks = (mapData[holeName] && mapData[holeName].sprinklers) ? mapData[holeName].sprinklers : [];
+
+      spks.forEach((spk, idx) => {
+        const item = document.createElement('div');
+        item.className = 'sprinkler-item';
+        item.innerHTML = `
+          <span>🔵 <b>${spk.name}</b> (${spk.lat.toFixed(6)}, ${spk.lng.toFixed(6)})</span>
+          <span style="color:#8b949e; font-size:0.65rem;">±${spk.accuracy.toFixed(1)}m</span>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function renderFullMap() {
+      const canvas = document.getElementById('mapCanvas');
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (perimeterPoints.length < 2) return;
+      const holeName = getActiveHoleName();
+      const perim = (mapData[holeName] && mapData[holeName].perimeter) ? mapData[holeName].perimeter : [];
+      const spks = (mapData[holeName] && mapData[holeName].sprinklers) ? mapData[holeName].sprinklers : [];
+      const probes = sessionLogs[holeName] ? Object.values(sessionLogs[holeName]).filter(p => p.lat && p.lng) : [];
 
-      const lats = perimeterPoints.map(p => p.lat);
-      const lngs = perimeterPoints.map(p => p.lng);
+      const allPoints = [...perim, ...spks, ...probes];
+      if (allPoints.length === 0) {
+        ctx.fillStyle = '#8b949e';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`No perimeter or sprinkler data logged for Hole ${holeName}`, canvas.width / 2, canvas.height / 2);
+        return;
+      }
+
+      const lats = allPoints.map(p => p.lat);
+      const lngs = allPoints.map(p => p.lng);
       const minLat = Math.min(...lats), maxLat = Math.max(...lats);
       const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
 
-      ctx.strokeStyle = '#2ea043';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
+      function toX(lng) { return 30 + ((lng - minLng) / (maxLng - minLng || 1)) * (canvas.width - 60); }
+      function toY(lat) { return 30 + ((maxLat - lat) / (maxLat - minLat || 1)) * (canvas.height - 60); }
 
-      perimeterPoints.forEach((p, idx) => {
-        const x = 20 + ((p.lng - minLng) / (maxLng - minLng || 1)) * (canvas.width - 40);
-        const y = 20 + ((maxLat - p.lat) / (maxLat - minLat || 1)) * (canvas.height - 40);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      // 1. Draw Green Perimeter
+      if (perim.length > 1) {
+        ctx.strokeStyle = '#2ea043';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        perim.forEach((p, i) => {
+          const x = toX(p.lng), y = toY(p.lat);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(46, 160, 67, 0.18)';
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // 2. Draw Sprinklers with Throw Radii
+      spks.forEach(spk => {
+        const x = toX(spk.lng), y = toY(spk.lat);
+        // Throw radius ring
+        ctx.strokeStyle = 'rgba(31, 111, 235, 0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.stroke();
+        // Sprinkler Head Dot
+        ctx.fillStyle = '#1f6feb';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(spk.name, x, y - 8);
       });
 
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(46, 160, 67, 0.15)';
-      ctx.fill();
-      ctx.stroke();
+      // 3. Draw Moisture Probe Shots
+      probes.forEach(probe => {
+        const x = toX(probe.lng), y = toY(probe.lat);
+        ctx.fillStyle = probe.vwc < 13 ? '#f85149' : (probe.vwc <= 18 ? '#2ea043' : '#58a6ff');
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
+    // --- PGR & GDD ENGINE ---
     function updatePgrUI() {
       const pct = Math.min(100, Math.round((pgrData.accumulatedGdd / pgrData.targetGdd) * 100));
       document.getElementById('pgrGddText').innerText = `${pgrData.accumulatedGdd} / ${pgrData.targetGdd} GDD`;
@@ -694,6 +849,7 @@
       alert(`PGR application logged. Cycle reset to 0 / ${target} GDD.`);
     }
 
+    // --- CSV EXPORTERS ---
     function exportToCSV() {
       let csv = "UUID,Timestamp,Hole,Point_ID,VWC_Percent,EC_mS_cm,Soil_Temp_C,Rod_Length_In,Soil_Type,GPS_Lat,GPS_Lng\n";
 
@@ -704,19 +860,38 @@
         }
       }
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      downloadCSV(csv, `FieldScout_Run_${new Date().toISOString().slice(0,10)}.csv`);
+    }
+
+    function exportSprinklersCSV() {
+      let csv = "Sprinkler_ID,Hole,Name,GPS_Lat,GPS_Lng,GPS_Accuracy_Meters,Timestamp\n";
+
+      for (const [hole, data] of Object.entries(mapData)) {
+        if (data.sprinklers) {
+          data.sprinklers.forEach(spk => {
+            csv += `${spk.id},${hole},${spk.name},${spk.lat},${spk.lng},${spk.accuracy.toFixed(2)},${spk.timestamp}\n`;
+          });
+        }
+      }
+
+      downloadCSV(csv, `Sprinklers_GIS_${new Date().toISOString().slice(0,10)}.csv`);
+    }
+
+    function downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `FieldScout_Run_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
     function clearAllData() {
-      if (confirm("Clear all recorded moisture, EC, and temperature logs?")) {
+      if (confirm("Clear all recorded moisture, EC, and sprinkler logs?")) {
         sessionLogs = {};
+        mapData = {};
         saveLogs();
         initHole();
       }
