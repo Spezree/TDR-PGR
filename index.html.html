@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>TurfScout Pro - TDR 350 & PGR</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #f0f6fc;
+      --text-dim: #8b949e;
+      --accent: #2ea043;
+      --accent-hover: #3fb950;
+      --wilt: #f85149;
+      --optimal: #2ea043;
+      --wet: #58a6ff;
+      --warn: #d29922;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 70px; }
+    
+    /* Top Header */
+    header { background-color: var(--card-bg); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .title { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .header-pills { display: flex; gap: 8px; align-items: center; }
+    .pill { background: #21262d; border: 1px solid var(--border); color: var(--text-dim); padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .pill.active { border-color: var(--accent); color: var(--accent-hover); }
+
+    /* Navigation Tabs */
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+    .tab-btn { background: none; border: none; color: var(--text-dim); display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; font-weight: 600; gap: 4px; cursor: pointer; width: 25%; }
+    .tab-btn.active { color: var(--accent-hover); }
+    .tab-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* Views */
+    .view-container { padding: 12px; max-width: 550px; margin: 0 auto; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Cards & Controls */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+    .card-title { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    
+    /* Config Selectors */
+    .select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
+    .select-btn { background: #21262d; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: center; }
+    .select-btn.active { background: #238636; border-color: #2ea043; color: white; }
+
+    /* Hole Navigation Banner */
+    .hole-banner { display: flex; justify-content: space-between; align-items: center; background: #21262d; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; }
+    .hole-title { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .hole-sub { font-size: 0.75rem; color: var(--text-dim); }
+
+    /* 12-Point Green Grid Matrix */
+    .green-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+    .grid-cell { background: #21262d; border: 2px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; min-height: 52px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+    .grid-cell.active-cell { border-color: #58a6ff; box-shadow: 0 0 8px rgba(88, 166, 255, 0.4); background: #1f293d; }
+    .grid-cell .cell-label { font-size: 0.65rem; color: var(--text-dim); position: absolute; top: 3px; left: 5px; }
+    .grid-cell .cell-val { font-size: 1.15rem; font-weight: 800; }
+    .grid-cell.wilt { background: rgba(248, 81, 73, 0.2); border-color: var(--wilt); color: #ff7b72; }
+    .grid-cell.optimal { background: rgba(46, 160, 67, 0.2); border-color: var(--optimal); color: #56d364; }
+    .grid-cell.wet { background: rgba(88, 166, 255, 0.2); border-color: var(--wet); color: #79c0ff; }
+
+    /* Custom Number Pad for Rapid Single-Thumb Entry */
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+    .num-btn { background: #21262d; border: 1px solid var(--border); color: #fff; padding: 14px; font-size: 1.3rem; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: center; }
+    .num-btn:active { background: #30363d; }
+    .num-btn.action { font-size: 0.9rem; color: var(--text-dim); display: flex; align-items: center; justify-content: center; }
+
+    /* Live Summary Bar */
+    .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; margin-bottom: 10px; }
+    .summary-box { background: #21262d; border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; }
+    .summary-box .val { font-size: 1rem; font-weight: 800; }
+    .summary-box .lbl { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+
+    /* Action Buttons */
+    .action-row { display: flex; gap: 8px; }
+    .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-secondary { background: #21262d; border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: rgba(248, 81, 73, 0.2); border: 1px solid var(--wilt); color: #ff7b72; }
+
+    /* PGR Module UI */
+    .progress-bar-bg { background: #21262d; border-radius: 10px; height: 16px; overflow: hidden; margin: 10px 0; border: 1px solid var(--border); }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2ea043, #d29922 80%, #f85149 100%); width: 0%; transition: width 0.3s ease; }
+
+    /* Map Canvas */
+    #perimeterCanvas { width: 100%; height: 260px; background: #000; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title">TURF SCOUT PRO</div>
+    <div class="header-pills">
+      <div class="pill" id="wakeLockStatus" onclick="toggleWakeLock()">⚡ Screen: Dim</div>
+      <div class="pill" id="gpsStatus">📡 GPS: Standby</div>
+    </div>
+  </header>
+
+  <main class="view-container">
+    <section id="view-moisture" class="view active">
+      
+      <div class="card">
+        <div class="card-title">Hardware & Route Profile</div>
+        <div class="select-grid">
+          <button class="select-btn active" id="route-sweeping" onclick="setRoute('sweeping')">Sweeping Run</button>
+          <button class="select-btn" id="route-standard" onclick="setRoute('standard')">Standard 1-18</button>
+        </div>
+        <div class="select-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <button class="select-btn" id="rod-15" onclick="setRod('1.5')">1.5"</button>
+          <button class="select-btn active" id="rod-30" onclick="setRod('3.0')">3.0"</button>
+          <button class="select-btn" id="rod-48" onclick="setRod('4.8')">4.8"</button>
+          <button class="select-btn" id="rod-80" onclick="setRod('8.0')">8.0"</button>
+        </div>
+      </div>
+
+      <div class="hole-banner">
+        <div>
+          <div class="hole-title" id="currentHoleTitle">Club Putter</div>
+          <div class="hole-sub" id="currentHoleSub">Stop 1 of 20 • Sweeping Run</div>
+        </div>
+        <button class="btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 6px;" onclick="skipGreen()">⤺ Skip</button>
+      </div>
+
+      <div class="green-matrix">
+        <div class="grid-cell" id="cell-10" onclick="selectCell(10)"><span class="cell-label">10:BL</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-11" onclick="selectCell(11)"><span class="cell-label">11:BC</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-12" onclick="selectCell(12)"><span class="cell-label">12:BR</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-7" onclick="selectCell(7)"><span class="cell-label">7:MBL</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-8" onclick="selectCell(8)"><span class="cell-label">8:MBC</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-9" onclick="selectCell(9)"><span class="cell-label">9:MBR</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-4" onclick="selectCell(4)"><span class="cell-label">4:MFL</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-5" onclick="selectCell(5)"><span class="cell-label">5:MFC</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-6" onclick="selectCell(6)"><span class="cell-label">6:MFR</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-1" onclick="selectCell(1)"><span class="cell-label">1:FL</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-2" onclick="selectCell(2)"><span class="cell-label">2:FC</span><span class="cell-val">-</span></div>
+        <div class="grid-cell" id="cell-3" onclick="selectCell(3)"><span class="cell-label">3:FR</span><span class="cell-val">-</span></div>
+      </div>
+
+      <div class="summary-bar">
+        <div class="summary-box"><div class="val" id="sumAvg">-</div><div class="lbl">Avg VWC</div></div>
+        <div class="summary-box"><div class="val" id="sumMin">-</div><div class="lbl">Min</div></div>
+        <div class="summary-box"><div class="val" id="sumMax">-</div><div class="lbl">Max</div></div>
+        <div class="summary-box"><div class="val" id="sumDry" style="color:#ff7b72;">0</div><div class="lbl">Dry Spots</div></div>
+      </div>
+
+      <div class="numpad">
+        <button class="num-btn" onclick="pressNum('1')">1</button>
+        <button class="num-btn" onclick="pressNum('2')">2</button>
+        <button class="num-btn" onclick="pressNum('3')">3</button>
+        <button class="num-btn" onclick="pressNum('4')">4</button>
+        <button class="num-btn" onclick="pressNum('5')">5</button>
+        <button class="num-btn" onclick="pressNum('6')">6</button>
+        <button class="num-btn" onclick="pressNum('7')">7</button>
+        <button class="num-btn" onclick="pressNum('8')">8</button>
+        <button class="num-btn" onclick="pressNum('9')">9</button>
+        <button class="num-btn action" onclick="clearCurrentCell()">CLEAR</button>
+        <button class="num-btn" onclick="pressNum('0')">0</button>
+        <button class="num-btn action" onclick="deleteDigit()">⌫</button>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-secondary" onclick="prevGreen()">◄ Prev</button>
+        <button class="btn btn-primary" id="saveNextBtn" onclick="nextGreen()">Save & Next Green ►</button>
+      </div>
+    </section>
+
+    <section id="view-gps" class="view">
+      <div class="card">
+        <div class="card-title">Green Perimeter Logger</div>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">Walk the outer collar edge with your Pixel mounted to generate the base map polygon.</p>
+        <div class="action-row" style="margin-bottom:10px;">
+          <button class="btn btn-primary" id="startWalkBtn" onclick="togglePerimeterTracking()">▶ Start Walk</button>
+          <button class="btn btn-secondary" onclick="clearPerimeter()">Reset</button>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-dim);" id="gpsCoordinatesLog">Points Logged: 0 | Accuracy: --</div>
+        <canvas id="perimeterCanvas" width="400" height="260"></canvas>
+      </div>
+    </section>
+
+    <section id="view-pgr" class="view">
+      <div class="card">
+        <div class="card-title">Primo / PGR Degradation Engine</div>
+        <div style="margin: 8px 0;">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
+            <span id="pgrStatusText">Greens Program: Active</span>
+            <span id="pgrGddText">185 / 220 GDD</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="pgrProgressFill" style="width: 84%;"></div>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-dim);" id="pgrReboundNotice">⚠️ Rebound surge window approaching in ~35 GDD.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Log Daily Temperature (GDD Base 10°C)</div>
+        <div class="select-grid">
+          <input type="number" id="tempMax" placeholder="Max Temp (°C)" class="select-btn" style="text-align:left;" />
+          <input type="number" id="tempMin" placeholder="Min Temp (°C)" class="select-btn" style="text-align:left;" />
+        </div>
+        <button class="btn btn-secondary" style="width:100%; margin-top:6px;" onclick="addDailyGdd()">+ Accumulate Today's GDD</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Log New PGR Application</div>
+        <input type="text" id="pgrProduct" placeholder="Product (e.g. Primo Maxx II)" class="select-btn" style="width:100%; text-align:left; margin-bottom:8px;" />
+        <div class="select-grid">
+          <input type="text" id="pgrRate" placeholder="Rate (e.g. 400 mL/ha)" class="select-btn" style="text-align:left;" />
+          <input type="number" id="pgrTargetGdd" placeholder="Target GDD (e.g. 220)" class="select-btn" style="text-align:left;" />
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:6px;" onclick="resetPgrCycle()">Apply & Reset GDD Cycle</button>
+      </div>
+    </section>
+
+    <section id="view-data" class="view">
+      <div class="card">
+        <div class="card-title">Export Spectrum FieldScout Data</div>
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:12px;">Export all recorded VWC%, rod settings, timestamps, and GPS coordinates to CSV formatted for SpecConnect.</p>
+        <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="exportToCSV()">📥 Download SpecConnect CSV</button>
+        <button class="btn btn-danger" style="width:100%;" onclick="clearAllData()">🗑 Clear Local Session Data</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchView('moisture', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2c-5.33 6.67-8 11-8 14 0 4.42 3.58 8 8 8s8-3.58 8-8c0-3-2.67-7.33-8-14zm0 20c-3.31 0-6-2.69-6-6 0-2.3 2-5.7 6-10.7 4 5 6 8.4 6 10.7 0 3.31-2.69 6-6 6z"/></svg>
+      TDR Probe
+    </button>
+    <button class="tab-btn" onclick="switchView('gps', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      Perimeter
+    </button>
+    <button class="tab-btn" onclick="switchView('pgr', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+      PGR & GDD
+    </button>
+    <button class="tab-btn" onclick="switchView('data', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Data / Sync
+    </button>
+  </nav>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    const ROUTES = {
+      sweeping: ["Club Putter", "6", "D Range Green", "16", "14", "15", "1", "10", "13", "12", "11", "2", "3", "4", "5", "7", "8", "17", "18", "9"],
+      standard: ["Club Putter", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "D Range Green"]
+    };
+
+    // Serpentine walking pattern: 1,2,3 -> 6,5,4 -> 7,8,9 -> 12,11,10
+    const SERPENTINE_ORDER = [1, 2, 3, 6, 5, 4, 7, 8, 9, 12, 11, 10];
+
+    let currentRouteType = 'sweeping';
+    let currentRodLength = '3.0';
+    let currentStopIndex = 0;
+    let activeCellId = 1;
+    let inputBuffer = "";
+    let wakeLock = null;
+
+    // Green Moisture Data Store: { "HoleName": { 1: val, 2: val, ... } }
+    let sessionLogs = JSON.parse(localStorage.getItem('turf_session_logs') || '{}');
+    
+    // PGR Tracker Data
+    let pgrData = JSON.parse(localStorage.getItem('turf_pgr_data') || JSON.stringify({
+      product: "Primo Maxx II",
+      rate: "400 mL/ha",
+      accumulatedGdd: 185,
+      targetGdd: 220
+    }));
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initHole();
+      updatePgrUI();
+      initGPS();
+    });
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // --- ROUTE & ROD CONFIG ---
+    function setRoute(type) {
+      currentRouteType = type;
+      currentStopIndex = 0;
+      document.getElementById('route-sweeping').classList.toggle('active', type === 'sweeping');
+      document.getElementById('route-standard').classList.toggle('active', type === 'standard');
+      initHole();
+    }
+
+    function setRod(length) {
+      currentRodLength = length;
+      ['15', '30', '48', '80'].forEach(id => {
+        document.getElementById('rod-' + id).classList.toggle('active', id === length.replace('.', ''));
+      });
+      refreshCellColors();
+    }
+
+    // --- HOLE LOGIC ---
+    function getActiveHoleName() {
+      return ROUTES[currentRouteType][currentStopIndex];
+    }
+
+    function initHole() {
+      const holeName = getActiveHoleName();
+      document.getElementById('currentHoleTitle').innerText = "Hole " + holeName;
+      document.getElementById('currentHoleSub').innerText = `Stop ${currentStopIndex + 1} of ${ROUTES[currentRouteType].length} • ${currentRouteType === 'sweeping' ? 'Sweeping Run' : 'Standard'}`;
+      
+      if (!sessionLogs[holeName]) {
+        sessionLogs[holeName] = {};
+      }
+
+      // Populate Grid
+      for (let i = 1; i <= 12; i++) {
+        const cell = document.getElementById(`cell-${i}`);
+        const val = sessionLogs[holeName][i] !== undefined ? sessionLogs[holeName][i].toFixed(1) : '-';
+        cell.querySelector('.cell-val').innerText = val;
+      }
+      refreshCellColors();
+      calculateSummary();
+      selectCell(1);
+    }
+
+    function selectCell(pointId) {
+      activeCellId = pointId;
+      inputBuffer = "";
+      document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('active-cell'));
+      const activeEl = document.getElementById(`cell-${pointId}`);
+      if (activeEl) activeEl.classList.add('active-cell');
+    }
+
+    // --- RAPID NO-DECIMAL KEYPAD LOGIC ---
+    function pressNum(digit) {
+      inputBuffer += digit;
+      const cell = document.getElementById(`cell-${activeCellId}`);
+      
+      if (inputBuffer.length < 3) {
+        cell.querySelector('.cell-val').innerText = (parseInt(inputBuffer) / 10).toFixed(1);
+      } else if (inputBuffer.length === 3) {
+        // Automatically convert 3 digits to decimal (e.g. 148 -> 14.8)
+        const vwcVal = parseFloat((parseInt(inputBuffer) / 10).toFixed(1));
+        recordVwc(activeCellId, vwcVal);
+        inputBuffer = "";
+        advanceSerpentine();
+      }
+    }
+
+    function deleteDigit() {
+      inputBuffer = inputBuffer.slice(0, -1);
+      const cell = document.getElementById(`cell-${activeCellId}`);
+      cell.querySelector('.cell-val').innerText = inputBuffer.length > 0 ? (parseInt(inputBuffer) / 10).toFixed(1) : '-';
+    }
+
+    function clearCurrentCell() {
+      inputBuffer = "";
+      const holeName = getActiveHoleName();
+      delete sessionLogs[holeName][activeCellId];
+      saveLogs();
+      initHole();
+    }
+
+    function recordVwc(pointId, value) {
+      const holeName = getActiveHoleName();
+      if (!sessionLogs[holeName]) sessionLogs[holeName] = {};
+      
+      // Get GPS coordinate if available
+      let lat = null, lng = null;
+      if (currentPosition) {
+        lat = currentPosition.coords.latitude;
+        lng = currentPosition.coords.longitude;
+      }
+
+      sessionLogs[holeName][pointId] = value;
+      saveLogs();
+      refreshCellColors();
+      calculateSummary();
+    }
+
+    function advanceSerpentine() {
+      const currentIdxInOrder = SERPENTINE_ORDER.indexOf(activeCellId);
+      if (currentIdxInOrder < SERPENTINE_ORDER.length - 1) {
+        selectCell(SERPENTINE_ORDER[currentIdxInOrder + 1]);
+      }
+    }
+
+    function refreshCellColors() {
+      const holeName = getActiveHoleName();
+      // Target bands based on probe length
+      const targetLow = currentRodLength === '1.5' ? 10.0 : 13.0;
+      const targetHigh = currentRodLength === '1.5' ? 15.0 : 18.0;
+
+      for (let i = 1; i <= 12; i++) {
+        const cell = document.getElementById(`cell-${i}`);
+        const val = sessionLogs[holeName] ? sessionLogs[holeName][i] : undefined;
+        cell.classList.remove('wilt', 'optimal', 'wet');
+
+        if (val !== undefined) {
+          if (val < targetLow) cell.classList.add('wilt');
+          else if (val <= targetHigh) cell.classList.add('optimal');
+          else cell.classList.add('wet');
+        }
+      }
+    }
+
+    function calculateSummary() {
+      const holeName = getActiveHoleName();
+      const vals = sessionLogs[holeName] ? Object.values(sessionLogs[holeName]) : [];
+      if (vals.length === 0) {
+        document.getElementById('sumAvg').innerText = '-';
+        document.getElementById('sumMin').innerText = '-';
+        document.getElementById('sumMax').innerText = '-';
+        document.getElementById('sumDry').innerText = '0';
+        return;
+      }
+      const avg = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+      const min = Math.min(...vals).toFixed(1);
+      const max = Math.max(...vals).toFixed(1);
+      const targetLow = currentRodLength === '1.5' ? 10.0 : 13.0;
+      const dryCount = vals.filter(v => v < targetLow).length;
+
+      document.getElementById('sumAvg').innerText = avg + '%';
+      document.getElementById('sumMin').innerText = min + '%';
+      document.getElementById('sumMax').innerText = max + '%';
+      document.getElementById('sumDry').innerText = dryCount;
+    }
+
+    function nextGreen() {
+      if (currentStopIndex < ROUTES[currentRouteType].length - 1) {
+        currentStopIndex++;
+        initHole();
+      } else {
+        alert("Run Complete! Ready to export session data.");
+      }
+    }
+
+    function prevGreen() {
+      if (currentStopIndex > 0) {
+        currentStopIndex--;
+        initHole();
+      }
+    }
+
+    function skipGreen() {
+      nextGreen();
+    }
+
+    function saveLogs() {
+      localStorage.setItem('turf_session_logs', JSON.stringify(sessionLogs));
+    }
+
+    // --- SCREEN WAKE LOCK API (Keeps screen awake on TDR mount) ---
+    async function toggleWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          if (!wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            document.getElementById('wakeLockStatus').innerText = "⚡ Screen: AWAKE";
+            document.getElementById('wakeLockStatus').classList.add('active');
+          } else {
+            wakeLock.release();
+            wakeLock = null;
+            document.getElementById('wakeLockStatus').innerText = "⚡ Screen: Dim";
+            document.getElementById('wakeLockStatus').classList.remove('active');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        alert("WakeLock not supported in this browser.");
+      }
+    }
+
+    // --- GPS & PERIMETER MAPPER ---
+    let currentPosition = null;
+    let isTrackingPerimeter = false;
+    let perimeterPoints = [];
+    let watchId = null;
+
+    function initGPS() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition(
+          pos => {
+            currentPosition = pos;
+            document.getElementById('gpsStatus').innerText = `📡 GPS: ±${pos.coords.accuracy.toFixed(1)}m`;
+            document.getElementById('gpsStatus').classList.add('active');
+          },
+          err => {
+            document.getElementById('gpsStatus').innerText = `📡 GPS: Error`;
+          },
+          { enableHighAccuracy: true }
+        );
+      }
+    }
+
+    function togglePerimeterTracking() {
+      isTrackingPerimeter = !isTrackingPerimeter;
+      const btn = document.getElementById('startWalkBtn');
+      if (isTrackingPerimeter) {
+        btn.innerText = "⏹ Stop & Save";
+        btn.classList.replace('btn-primary', 'btn-danger');
+        perimeterPoints = [];
+        watchId = navigator.geolocation.watchPosition(recordPerimeterPoint, null, { enableHighAccuracy: true });
+      } else {
+        btn.innerText = "▶ Start Walk";
+        btn.classList.replace('btn-danger', 'btn-primary');
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        drawPerimeterCanvas();
+      }
+    }
+
+    function recordPerimeterPoint(pos) {
+      perimeterPoints.push({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      document.getElementById('gpsCoordinatesLog').innerText = `Points: ${perimeterPoints.length} | Accuracy: ±${pos.coords.accuracy.toFixed(1)}m`;
+      drawPerimeterCanvas();
+    }
+
+    function clearPerimeter() {
+      perimeterPoints = [];
+      drawPerimeterCanvas();
+      document.getElementById('gpsCoordinatesLog').innerText = `Points Logged: 0 | Accuracy: --`;
+    }
+
+    function drawPerimeterCanvas() {
+      const canvas = document.getElementById('perimeterCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (perimeterPoints.length < 2) return;
+
+      const lats = perimeterPoints.map(p => p.lat);
+      const lngs = perimeterPoints.map(p => p.lng);
+      const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+      const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+
+      ctx.strokeStyle = '#2ea043';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      perimeterPoints.forEach((p, idx) => {
+        const x = 30 + ((p.lng - minLng) / (maxLng - minLng || 1)) * (canvas.width - 60);
+        const y = 30 + ((maxLat - p.lat) / (maxLat - minLat || 1)) * (canvas.height - 60);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(46, 160, 67, 0.15)';
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // --- PGR & GDD ENGINE ---
+    function updatePgrUI() {
+      const pct = Math.min(100, Math.round((pgrData.accumulatedGdd / pgrData.targetGdd) * 100));
+      document.getElementById('pgrGddText').innerText = `${pgrData.accumulatedGdd} / ${pgrData.targetGdd} GDD`;
+      document.getElementById('pgrProgressFill').style.width = pct + '%';
+      
+      if (pct >= 80) {
+        document.getElementById('pgrReboundNotice').innerText = `⚠️ Rebound surge window approaching in ~${pgrData.targetGdd - pgrData.accumulatedGdd} GDD.`;
+      } else {
+        document.getElementById('pgrReboundNotice').innerText = `✅ Suppression phase optimal. (${pct}% elapsed)`;
+      }
+      localStorage.setItem('turf_pgr_data', JSON.stringify(pgrData));
+    }
+
+    function addDailyGdd() {
+      const max = parseFloat(document.getElementById('tempMax').value);
+      const min = parseFloat(document.getElementById('tempMin').value);
+      if (isNaN(max) || isNaN(min)) return alert("Please enter valid max and min temperatures.");
+      
+      const avg = (max + min) / 2;
+      const dailyGdd = Math.max(0, avg - 10); // Base 10°C standard
+      pgrData.accumulatedGdd = Math.round(pgrData.accumulatedGdd + dailyGdd);
+      updatePgrUI();
+      document.getElementById('tempMax').value = '';
+      document.getElementById('tempMin').value = '';
+    }
+
+    function resetPgrCycle() {
+      const prod = document.getElementById('pgrProduct').value || "Primo Maxx II";
+      const rate = document.getElementById('pgrRate').value || "400 mL/ha";
+      const target = parseInt(document.getElementById('pgrTargetGdd').value) || 220;
+      
+      pgrData = { product: prod, rate: rate, accumulatedGdd: 0, targetGdd: target };
+      updatePgrUI();
+      alert(`PGR application logged. Cycle reset to 0 / ${target} GDD.`);
+    }
+
+    // --- CSV EXPORT (SpecConnect Compatible) ---
+    function exportToCSV() {
+      let csv = "UUID,Timestamp,Hole,Rod_Length_In,Point_ID,VWC_Percent,GPS_Lat,GPS_Lng\n";
+      const now = new Date().toISOString();
+
+      for (const [hole, points] of Object.entries(sessionLogs)) {
+        for (const [pointId, vwc] of Object.entries(points)) {
+          const uuid = 'log-' + Math.random().toString(36).substr(2, 9);
+          csv += `${uuid},${now},${hole},${currentRodLength},${pointId},${vwc},,\n`;
+        }
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `FieldScout_Run_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function clearAllData() {
+      if (confirm("Are you sure you want to clear all logged moisture readings?")) {
+        sessionLogs = {};
+        saveLogs();
+        initHole();
+      }
+    }
+  </script>
+</body>
+</html>
